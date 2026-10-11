@@ -1,0 +1,32 @@
+[
+  {
+    "id": "seed-1",
+    "title": "Смартфон Nova X12",
+    "category": "Смартфоны",
+    "price": 699,
+    "description": "AMOLED-экран 6,5\", 256 ГБ памяти, аккумулятор 5000 мА·ч и быстрая зарядка.",
+    "inStock": true,
+    "ownerId": null,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "seed-2",
+    "title": "Ноутбук ProBook 14",
+    "category": "Ноутбуки",
+    "price": 1099,
+    "description": "14\" IPS-дисплей, 16 ГБ оперативной памяти, SSD на 512 ГБ.",
+    "inStock": true,
+    "ownerId": null,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "seed-3",
+    "title": "Наушники Aura Buds",
+    "category": "Аудио",
+    "price": 129,
+    "description": "Беспроводные наушники с активным шумоподавлением и автономностью до 30 часов.",
+    "inStock": true,
+    "ownerId": null,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+]
