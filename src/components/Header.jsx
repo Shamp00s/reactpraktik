@@ -1,21 +1,17 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import '../styles/Header.css';
 import { useAuth } from '../hooks/useAuth.js';
-import { useCart } from '../conext/CartContext.jsx';
 
 const linkClass = ({ isActive }) => (isActive ? 'active' : undefined);
 
-export default function Header() {
+const Header = () => {
   const { user, logout } = useAuth();
-  const { totalCount } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
-
-  const userInitial = user?.name?.trim()?.[0]?.toUpperCase() || '?';
 
   return (
     <header className="header">
@@ -29,27 +25,21 @@ export default function Header() {
           <NavLink to="/items" className={linkClass}>Каталог</NavLink>
           <NavLink to="/explore" className={linkClass}>Внешний API</NavLink>
           {user && <NavLink to="/dashboard" className={linkClass}>Управление</NavLink>}
-          <NavLink to="/cart" className={linkClass}>Корзина ({totalCount})</NavLink>
+          {user?.role === 'admin' && <NavLink to="/admin" className={linkClass}>Админка</NavLink>}
         </nav>
 
         {user ? (
-          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {user.role === 'admin' && (
-              <Link to="/admin" style={{ background: '#f59e0b', color: '#000', padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', textDecoration: 'none' }}>
-                👑 Вы админ
-              </Link>
-            )}
-            <NavLink to="/profile" className="user-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-              {user.photo ? (
-                <img src={user.photo} alt="Avatar" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+          <div className="header-actions">
+            <NavLink to="/profile" className="user-chip">
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="" className="user-avatar" />
               ) : (
-                <span style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '13px' }}>
-                  {userInitial}
+                <span className="user-avatar user-avatar--placeholder">
+                  {user.name?.[0]?.toUpperCase() || '?'}
                 </span>
               )}
-              <span>{user.name}</span>
+              <span className="user-name">{user.name}</span>
             </NavLink>
-            <NavLink to="/settings" title="Настройки" className="btn" style={{ padding: '4px 8px' }}>⚙️</NavLink>
             <button type="button" onClick={handleLogout} className="btn">Выйти</button>
           </div>
         ) : (
@@ -61,4 +51,6 @@ export default function Header() {
       </div>
     </header>
   );
-}
+};
+
+export default Header;

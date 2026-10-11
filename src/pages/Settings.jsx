@@ -49,6 +49,7 @@ const Settings = () => {
     }
     navigate('/profile');
   };
+  
 
   const previewValid = photoURL.trim() && /^https?:\/\//i.test(photoURL.trim());
 

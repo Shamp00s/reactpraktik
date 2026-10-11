@@ -45,9 +45,17 @@ const Catalog = () => {
       <p>Товары, которые добавили пользователи магазина.</p>
 
       <div className="catalog-toolbar">
-        <input type="text" placeholder="Поиск товара..." className="search-input" value={query} onChange={(e) => setQuery(e.target.value)}
+        <input
+          type="text"
+          placeholder="Поиск товара..."
+          className="search-input"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
         />
-        <select className="category-select" value={category} onChange={(e) => setCategory(e.target.value)}
+        <select
+          className="category-select"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
         >
           <option value="">Все категории</option>
           {CATEGORIES.map((c) => (
@@ -70,15 +78,19 @@ const Catalog = () => {
 
       {status === 'ready' && filtered.length > 0 && (
         <div className="product-grid">
-          {filtered.map((item) => (
-            <ProductCard
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              price={item.price}
-              image={item.image}
-            />
-          ))}
+          {filtered.map((item) => {
+            const itemImage = item.image || item.imageUrl || item.img || item.photo || item.picture || item.url;
+            return (
+              <ProductCard
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                price={item.price}
+                image={itemImage}
+                imageUrl={itemImage}
+              />
+            );
+          })}
         </div>
       )}
     </div>

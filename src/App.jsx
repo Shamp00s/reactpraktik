@@ -12,6 +12,8 @@ import NotFound from './pages/NotFound.jsx';
 import Profile from './pages/Profile.jsx';
 import Settings from './pages/Settings.jsx';
 import Admin from './pages/Admin.jsx';
+import Cart from './pages/Cart.jsx';
+import './App.css';
 import './App.css';
 
 export default function App() {
@@ -24,6 +26,7 @@ export default function App() {
         <Route path="/explore" element={<Explore />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/cart" element={<Cart />} />
         
         {/* Защищенные маршруты */}
         <Route element={<ProtectedRoute />}>

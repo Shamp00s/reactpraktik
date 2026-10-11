@@ -6,8 +6,6 @@ export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Firebase сам восстанавливает сессию и уведомляет о каждом изменении —
-  // это и заменяет собой ручной fetch('/auth/me').
   useEffect(() => {
     const unsubscribe = authApi.subscribe((currentUser) => {
       setUser(currentUser);
@@ -44,7 +42,10 @@ export default function AuthProvider({ children }) {
   const updateSettings = async (payload) => {
     try {
       const updated = await authApi.updateSettings(payload);
-      setUser(updated);
+      setUser((prev) => ({
+        ...prev,
+        ...updated,
+      }));
       return { success: true };
     } catch (err) {
       return { success: false, message: err.message };

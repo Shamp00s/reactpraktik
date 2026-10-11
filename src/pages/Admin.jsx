@@ -30,10 +30,8 @@ const Admin = () => {
     };
   }, [reloadKey]);
 
-  // Доступ только для admin. Это для UX — реальная защита в firestore.rules
-  // (изменить чужую роль без admin нельзя, что бы ни показывал интерфейс).
-if (user?.role !== 'admin') {
-    return <Navigate to="/" replace />;
+  if (user?.role !== 'admin') {
+    return <Navigate to="/403" replace />;
   }
 
   const toggleRole = async (target) => {

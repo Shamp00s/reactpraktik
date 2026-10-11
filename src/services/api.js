@@ -69,18 +69,15 @@ export const authApi = {
     });
   },
 
-  // ВОТ ЗДЕСЬ создаётся документ пользователя в Firestore (users/{uid}),
-
   async register(name, email, password, age) {
     try {
       const { user: fbUser } = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(fbUser, { displayName: name });
 
-      // Роль по умолчанию — всегда "user". Админа себе делаете вручную:
       const profile = {
         name,
         email,
-        role: 'user', // 👈 вот это поле и есть разграничение прав
+        role: 'user', // роль по умолчанию; на admin меняется вручную в Firestore или через /admin
         age: Number(age),
         rating: 5,
         photoURL: null,
@@ -106,10 +103,17 @@ export const authApi = {
     await signOut(auth);
   },
 
-  // Настройки профиля: имя + аватар по ссылке (без Firebase Storage — он платный).
-  async updateSettings({ name, photoURL }) {
-    const fbUser = auth.currentUser;
-    if (!fbUser) throw new ApiError('Требуется вход в аккаунт');
+async updateSettings({ name, photoURL }) {
+  const fbUser = auth.currentUser;
+  if (!fbUser) throw new ApiError('Требуется вход в аккаунт');
+
+console.log('--- ДИАГНОСТИКА ---');
+console.log('currentUser UID:', fbUser?.uid);
+console.log('currentUser email:', fbUser?.email);
+console.log('auth привязан к проекту:', auth.app.options.projectId);
+console.log('db привязан к проекту:', db.app.options.projectId);
+console.log('auth и db — один и тот же app?', auth.app === db.app);
+console.log('-------------------');
 
     await updateProfile(fbUser, { displayName: name, photoURL: photoURL || null });
     await updateDoc(doc(db, 'users', fbUser.uid), { name, photoURL: photoURL || null });
@@ -188,20 +192,17 @@ export const itemsApi = {
   },
 };
 
-
 export const adminApi = {
   async listUsers() {
     const snap = await getDocs(collection(db, 'users'));
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   },
 
-  async setRole(userId, role) {
-    const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, { role });
+  async setRole(uid, role) {
+    await updateDoc(doc(db, 'users', uid), { role });
   },
 
-  async deleteProfile(userId) {
-    const userRef = doc(db, 'users', userId);
-    await deleteDoc(userRef);
+  async deleteProfile(uid) {
+    await deleteDoc(doc(db, 'users', uid));
   },
 };
