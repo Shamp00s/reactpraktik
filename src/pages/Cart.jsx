@@ -1,44 +1,171 @@
-import { Link } from 'react-router-dom';
-import { useCart } from '../conext/CartContext.jsx';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import '../styles/cart.css';
 
+const Cart = () => {
+  const [cartItems, setCartItems] = useState([]);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
 
-export default function Cart() {
-  const { cart, removeFromCart, clearCart, totalPrice } = useCart();
+  // Загрузка корзины из localStorage при монтировании
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('cart');
+      if (saved) {
+        setCartItems(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Ошибка загрузки корзины:', e);
+    }
+  }, []);
 
-  if (cart.length === 0) {
+  // Сохранение в localStorage при изменении
+  const updateCart = (newItems) => {
+    setCartItems(newItems);
+    localStorage.setItem('cart', JSON.stringify(newItems));
+  };
+
+  const increaseQuantity = (id) => {
+    const updated = cartItems.map((item) =>
+      item.id === id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
+    );
+    updateCart(updated);
+  };
+
+  const decreaseQuantity = (id) => {
+    const updated = cartItems
+      .map((item) =>
+        item.id === id ? { ...item, quantity: (item.quantity || 1) - 1 } : item
+      )
+      .filter((item) => item.quantity > 0);
+    updateCart(updated);
+  };
+
+  const removeItem = (id) => {
+    const updated = cartItems.filter((item) => item.id !== id);
+    updateCart(updated);
+  };
+
+  const clearCart = () => {
+    updateCart([]);
+  };
+
+  const handleCheckout = () => {
+    setIsSuccess(true);
+    localStorage.removeItem('cart');
+    setCartItems([]);
+  };
+
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + item.price * (item.quantity || 1),
+    0
+  );
+
+  if (isSuccess) {
     return (
-      <div className="page-cart container">
-        <h2>Корзина</h2>
-        <p>Ваша корзина пуста.</p>
-        <Link to="/items" className="btn btn-primary" style={{ marginTop: '1rem', display: 'inline-block' }}>Перейти в каталог</Link>
+      <div className="page-cart page-cart--empty">
+        <div className="cart-success-box">
+          <h2>🎉 Заказ успешно оформлен!</h2>
+          <p>Спасибо за покупку в ЭлектроМаркете. Мы свяжемся с вами в ближайшее время.</p>
+          <button type="button" className="btn btn-primary" onClick={() => navigate('/items')}>
+            Вернуться в каталог
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (cartItems.length === 0) {
+    return (
+      <div className="page-cart page-cart--empty">
+        <h2>Корзина пуста</h2>
+        <p>Вы еще не добавили ни одного товара в корзину.</p>
+        <Link to="/items" className="btn btn-primary">
+          Перейти в каталог
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="page-cart container">
-      <h2>Корзина покупок</h2>
-      <div className="cart-list" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {cart.map((item) => (
-          <div key={item.id} className="cart-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', border: '1px solid var(--border)', borderRadius: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <img src={item.image || 'https://via.placeholder.com/60'} alt={item.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }} />
-              <div>
-                <h4 style={{ margin: '0 0 4px' }}>{item.title}</h4>
-                <p style={{ margin: 0, opacity: 0.8 }}>{item.price} ₽ × {item.quantity}</p>
+    <div className="page-cart">
+      <h2>Корзина товаров</h2>
+      <p>Проверьте выбранные товары перед оформлением заказа.</p>
+
+      <div className="cart-content">
+        <div className="cart-items-list">
+          {cartItems.map((item) => {
+            const itemImage = item.image || item.imageUrl || null;
+            return (
+              <div key={item.id} className="cart-item-row">
+                {itemImage ? (
+                  <img src={itemImage} alt="" className="cart-item-thumb" />
+                ) : (
+                  <div className="cart-item-thumb cart-item-thumb--placeholder">🖼️</div>
+                )}
+                <div className="cart-item-info">
+                  <h4 className="cart-item-title">{item.title}</h4>
+                  <p className="cart-item-price">{item.price} ₽</p>
+                </div>
+
+                <div className="cart-item-controls">
+                  <button
+                    type="button"
+                    className="qty-btn"
+                    onClick={() => decreaseQuantity(item.id)}
+                  >
+                    -
+                  </button>
+                  <span className="qty-value">{item.quantity || 1}</span>
+                  <button
+                    type="button"
+                    className="qty-btn"
+                    onClick={() => increaseQuantity(item.id)}
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div className="cart-item-total">
+                  {item.price * (item.quantity || 1)} ₽
+                </div>
+
+                <button
+                  type="button"
+                  className="btn-remove"
+                  onClick={() => removeItem(item.id)}
+                  title="Удалить товар"
+                >
+                  ✕
+                </button>
               </div>
-            </div>
-            <button onClick={() => removeFromCart(item.id)} className="btn" style={{ background: '#ff5f56', color: '#fff', border: 'none' }}>Удалить</button>
+            );
+          })}
+        </div>
+
+        <div className="cart-summary">
+          <h3>Итого</h3>
+          <div className="summary-row">
+            <span>Товары ({cartItems.reduce((acc, i) => acc + (i.quantity || 1), 0)} шт.)</span>
+            <span>{totalPrice} ₽</span>
           </div>
-        ))}
-      </div>
-      <div className="cart-summary" style={{ marginTop: '24px', padding: '20px', border: '1px solid var(--border)', borderRadius: '12px' }}>
-        <h3>Итого к оплате: {totalPrice} ₽</h3>
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-          <button onClick={clearCart} className="btn">Очистить</button>
-          <button onClick={() => { alert('Заказ оформлен!'); clearCart(); }} className="btn btn-primary">Оформить заказ</button>
+          <div className="summary-total">
+            <span>К оплате</span>
+            <span>{totalPrice} ₽</span>
+          </div>
+
+          <div className="cart-summary-actions">
+            <button type="button" className="btn btn-primary btn-checkout" onClick={handleCheckout}>
+              Оформить заказ
+            </button>
+            <button type="button" className="btn btn-outline" onClick={clearCart}>
+              Очистить корзину
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Cart;
